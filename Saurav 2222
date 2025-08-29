@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>वीडियो अपलोड करें और लिंक पाएं</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 0 20px; }
+    .card { padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    input[type=file] { display: block; margin: 10px 0; }
+    input[type=submit] { padding: 8px 16px; border-radius: 5px; cursor: pointer; }
+    .linkbox { margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>वीडियो अपलोड करें और लिंक प्राप्त करें</h1>
+  <div class="card">
+    <form id="uploadForm">
+      <label for="video">अपना वीडियो चुनें:</label>
+      <input type="file" id="video" name="video" accept="video/*" required>
+      <input type="submit" value="अपलोड करें">
+    </form>
+    <div id="result" class="linkbox" style="display:none;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('video');
+      if (!fileInput.files.length) return alert('पहले फाइल चुनें।');
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('video', file);
+
+      result.style.display = 'block';
+      result.textContent = 'अपलोड हो रहा है, कृपया प्रतीक्षा करें...';
+
+      try {
+        // यहाँ अपनी बैकएंड API URL डालें
+        const response = await fetch('http://localhost:3000/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          result.innerHTML = `<strong>लिंक:</strong> <a href="${data.link}" target="_blank">${data.link}</a>`;
+        } else {
+          result.textContent = data.error || 'अपलोड में समस्या हुई।';
+        }
+      } catch (err) {
+        result.textContent = 'अपलोड विफल: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
