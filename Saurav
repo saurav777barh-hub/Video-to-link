@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video → Link Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>🎥 Video → Link Converter</h2>
+        <input type="file" id="fileInput" accept="video/*"><br><br>
+        <button id="uploadBtn">Upload & Get Link</button>
+        <p id="status"></p>
+        <div id="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 50px;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+p {
+    margin-top: 20px;
+    font-weight: bold;
+}document.getElementById('uploadBtn').addEventListener('click', async function() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Please select a file first!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const status = document.getElementById('status');
+    const result = document.getElementById('result');
+
+    status.innerText = '⏳ Uploading...';
+    result.innerHTML = '';
+
+    try {
+        const response = await fetch('https://api.gofile.io/uploadFile', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.status === 'ok') {
+            result.innerHTML = `File uploaded successfully! <a href="${data.data.link}" target="_blank">Download Link</a>`;
+        } else {
+            result.innerText = 'Error: ' + data.message;
+        }
+    } catch (error) {
+        result.innerText = 'Error: Upload failed';
+        console.error(error);
+    }
+});
